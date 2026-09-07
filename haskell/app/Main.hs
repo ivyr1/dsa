@@ -4,6 +4,8 @@
 
 module Main (main) where
 
+import GHC.Internal.Data.List
+
 -- fibs :: [Integer]
 -- fibs = 0 : 1 : zipWith (+) fibs (drop 1 fibs)
 --
@@ -266,9 +268,49 @@ removeAt n (x : xs)
       let (val, rest) = removeAt (n - 1) xs
        in (val, x : rest)
 
+-- Insert an element at a given position into a list.
+insertAt :: a -> [a] -> Int -> [a]
+insertAt m xs idx = insert xs idx
+  where
+    insert [] _ = [m]
+    insert ys 1 = m : ys
+    insert (y : ys) k = y : insert ys (k - 1)
+
+insertAt' x xs n =
+  let (front, back) = splitAt (max 0 (n - 1)) xs
+   in front ++ (x : back)
+
+-- Create a list containing all integers within a given range.
+range :: Int -> Int -> [Int]
+range a b
+  | a > b = []
+  | otherwise = a : range (a + 1) b
+
+-- Extract a given number of randomly selected elements from a list.
+
+-- Generate combinations of K distinct objects chosen from the N elements of a list.
+combinations :: Int -> [a] -> [[a]]
+combinations 0 [] = [[]]
+combinations n xs =
+  [ y : ys
+  | -- > tails [0,1,2,3]
+    -- [[0,1,2,3],[1,2,3],[2,3],[3],[]]
+    y : xs' <- tails xs,
+    ys <- combinations (n - 1) xs'
+  ]
+
+combinations' :: Int -> [a] -> [[a]]
+combinations' 0 _ = [[]]
+combinations' _ [] = []
+combinations' n (x : xs) =
+  map (x :) (combinations' (n - 1) xs) ++ combinations' n xs
+
 main :: IO ()
 main = do
   putStrLn "-- 99 problems --"
+  print (range 4 9)
+
+-- print (insertAt 'X' "abcd" 2)
 
 -- print (rotate' ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] 3)
 -- print (rotate' ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] (-2))
